@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane hgap="14.0" maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="biovis.sierra.client.GUI.BusyDialogController">
+  <children>
+    <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="TOP">
+      <image>
+        <Image url="biovis/sierra/client/GUI/alert.png" />
+      </image>
+    </ImageView>
+    <VBox maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" prefWidth="400.0" spacing="7.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+      <children>
+        <Label fx:id="messageLabel" text="Error" textAlignment="LEFT" wrapText="true">
+          <font>
+            <Font name="System Bold" size="13.0" />
+          </font>
+        </Label>
+        <Label fx:id="detailsLabel" text="The server locked due to a running calculation task!" textAlignment="LEFT" wrapText="true">
+          <font>
+            <Font size="12.0" />
+          </font>
+        </Label>
+      </children>
+    </VBox>
+    <HBox maxHeight="-Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <children>
+        <HBox fx:id="actionParent" alignment="CENTER">
+          <HBox.margin>
+            <Insets />
+          </HBox.margin>
+        </HBox>
+        <Pane maxWidth="+Infinity" HBox.hgrow="ALWAYS">
+               <children>
+            <Button fx:id="okButton" layoutX="121.0" minWidth="80.0" mnemonicParsing="false" onAction="#exit" text="Ok" />
+               </children></Pane>
+        <HBox fx:id="okParent" alignment="CENTER" />
+      </children>
+    </HBox>
+  </children>
+  <columnConstraints>
+    <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+    <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="+Infinity" minWidth="-Infinity" />
+  </columnConstraints>
+  <padding>
+    <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+  </padding>
+  <rowConstraints>
+    <RowConstraints maxHeight="+Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="ALWAYS" />
+    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+  </rowConstraints>
+</GridPane>

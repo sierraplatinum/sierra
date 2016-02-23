@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.media.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="768.0" minWidth="1024.0" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@linechart.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="biovis.sierra.client.GUI.FXMLDocumentController">
+   <children>
+      <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+                  <Menu mnemonicParsing="false" text="Config Management">
+                    <items>
+                      <MenuItem fx:id="mCOpen" mnemonicParsing="false" onAction="#loadConfig" text="Load Config" />
+                        <MenuItem fx:id="mCSave" mnemonicParsing="false" onAction="#saveConfig" text="Save Config" />
+                    </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="State Management" visible="false">
+                    <items>
+                      <MenuItem fx:id="mSOpen" mnemonicParsing="false" onAction="#loadState" text="Load State" />
+                        <MenuItem fx:id="mSSave" mnemonicParsing="false" onAction="#saveState" text="Save State" />
+                    </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="Datamapper Management">
+                    <items>
+                      <MenuItem fx:id="mDLoad" mnemonicParsing="false" onAction="#loadMapper" text="Load Datamapper" />
+                        <MenuItem fx:id="mDSave" mnemonicParsing="false" onAction="#saveMapper" text="Save Datamapper" />
+                    </items>
+                  </Menu>
+                  <MenuItem fx:id="mPSave" mnemonicParsing="false" onAction="#savePeaks" text="Save Peaks Calls" visible="false" />
+                  <MenuItem mnemonicParsing="false" onAction="#saveFigures" text="Save figures" />
+              <MenuItem fx:id="mClose" mnemonicParsing="false" onAction="#close" text="Close" />
+            </items>
+          </Menu>
+            <Menu mnemonicParsing="false" text="Server">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#createServer" text="Edit Server Connection" />
+                  <MenuItem mnemonicParsing="false" onAction="#pullData" text="Pull datamapper from server" />
+                  <MenuItem fx:id="mPullBroad" disable="true" mnemonicParsing="false" onAction="#pullBroad" text="Get broad peaks" />
+                  <MenuItem fx:id="mPullNarrow" mnemonicParsing="false" onAction="#pullNarrow" text="Get narrow peaks" />
+                  <MenuItem fx:id="mSaveState" mnemonicParsing="false" onAction="#SaveState" text="Save state" />
+                  <MenuItem fx:id="mKillBill" disable="true" mnemonicParsing="false" onAction="#killBill" text="Kill job" />
+              </items>
+            </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#openAbout" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <TabPane fx:id="tabPane" layoutX="6.0" layoutY="29.0" prefHeight="376.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+        <tabs>
+          <Tab text="Replicates">
+            <content>
+              <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <GridPane prefHeight="343.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" percentHeight="85.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" percentHeight="2.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <TreeView fx:id="treeView" editable="true" onMouseClicked="#addDataset" prefHeight="200.0" prefWidth="200.0" showRoot="false" GridPane.columnSpan="2147483647" />
+                              <GridPane GridPane.rowIndex="2">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Button fx:id="experiment" mnemonicParsing="false" onMouseClicked="#addReplicate" text="Add Replicate" GridPane.halignment="RIGHT" />
+                                    <TextField fx:id="windowsize" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                                    <TextField fx:id="offset" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
+                                    <Label text="window size   " GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                                    <Label text="offset   " GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                                 </children>
+                              </GridPane>
+                              <GridPane fx:id="controllpane" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="p-value cutoff   " GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                                    <ProgressBar fx:id="progress" prefWidth="200.0" progress="0.0" style="-fx-accent: green;" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                    <Label text="number of threads   " GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                                    <GridPane GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                      <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="40.0" prefWidth="40.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="210.0" minWidth="10.0" prefWidth="176.0" />
+                                      </columnConstraints>
+                                      <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                      </rowConstraints>
+                                       <children>
+                                          <Arc fx:id="pacMan" fill="#008000" length="270.0" radiusX="19.0" radiusY="19.0" startAngle="45.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" GridPane.valignment="BOTTOM" />
+                                          <Label fx:id="dnaLabel" prefHeight="15.0" prefWidth="200.0" textFill="#ff7108" visible="false" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                                             <opaqueInsets>
+                                                <Insets />
+                                             </opaqueInsets>
+                                             <GridPane.margin>
+                                                <Insets top="7.0" />
+                                             </GridPane.margin>
+                                          </Label>
+                                       </children>
+                                    </GridPane>
+                                    <Label text="job name   " GridPane.halignment="RIGHT" />
+                                    <TextField fx:id="jobName" maxWidth="-Infinity" prefHeight="25.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" />
+                                    <TextField fx:id="pcutoff" maxWidth="-Infinity" onAction="#keyPressedPValue" prefHeight="25.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                                    <HBox fx:id="spinnerPane" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+                                    <Button fx:id="start" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#startCalc" prefHeight="25.0" prefWidth="53.0" text="Start" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets right="12.0" />
+                                       </GridPane.margin>
+                                    </Button>
+                                    
+                                 </children>
+                              </GridPane>
+                           </children>
+                        </GridPane>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>

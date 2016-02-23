@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="biovis.sierra.client.GUI.BusyDialogController">
+  <children>
+    <VBox maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" prefWidth="400.0" spacing="7.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+      <children>
+        <Label fx:id="messageLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="16.0" prefWidth="527.0" text="Info" textAlignment="CENTER" wrapText="true">
+          <font>
+            <Font name="System Bold" size="13.0" />
+          </font>
+        </Label>
+        <Label fx:id="detailsLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="15.0" prefWidth="408.0" text="receiving data" textAlignment="CENTER" wrapText="true">
+          <font>
+            <Font size="12.0" />
+          </font>
+        </Label>
+      </children>
+    </VBox>
+    <HBox maxHeight="-Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2">
+      <children>
+        <HBox fx:id="actionParent" alignment="CENTER">
+          <HBox.margin>
+            <Insets />
+          </HBox.margin>
+        </HBox>
+        <Pane maxWidth="+Infinity" HBox.hgrow="ALWAYS" />
+        <HBox fx:id="okParent" alignment="CENTER" />
+      </children>
+    </HBox>
+      <ProgressBar fx:id="progressBar" prefHeight="20.0" prefWidth="277.0" style="-fx-accent: green;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+  </children>
+  <columnConstraints>
+    <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+    <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="+Infinity" minWidth="-Infinity" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints maxHeight="Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="ALWAYS" />
+    <RowConstraints maxHeight="Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="ALWAYS" />
+      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+  </rowConstraints>
+</GridPane>
