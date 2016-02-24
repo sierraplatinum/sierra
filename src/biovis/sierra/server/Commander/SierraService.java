@@ -90,8 +90,9 @@ public class SierraService {
 			sm.setSpc(new SuperDuperPeakCaller(sm.getMapper(),peakdisp.getPc(),sm.getChunksize()));
 			if(argsParser.getIOThreads() != 6){
 
+				sm.setIOThreads(argsParser.getIOThreads());
 				dm.setIOThreads(argsParser.getIOThreads());
-				
+
 			}
 			//			sm.getSpc().init();
 			if(argsParser.getBatch())
