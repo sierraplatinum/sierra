@@ -17,27 +17,29 @@
  */
 package biovis.sierra.server;
 
-import biovis.sierra.server.correlation.PearsonCorrelationParallelFast;
-import biovis.sierra.server.p2q.QValueCalculator;
-import biovis.sierra.server.p2q.QValueCalculatorHB;
-import biovis.sierra.server.p2q.QValueCalculatorStoreyBootStrapSpline;
-import biovis.sierra.server.p2q.QValueCalculatorStoreySimple;
 import biovis.sierra.server.peakMe.PeakMeSpaceParallel;
 import biovis.sierra.server.peakQuality.SuperDuperQualityCoherentBN3Smart;
 import biovis.sierra.data.DataMapper;
 import biovis.sierra.data.Replicate;
 import biovis.sierra.data.peakcaller.PeakList;
 import biovis.sierra.data.peakcaller.PeakQuality;
-import biovis.sierra.data.peakcaller.PoissonDistributionCollection;
 import biovis.sierra.data.windows.Window;
 import biovis.sierra.data.windows.WindowList;
 import biovis.sierra.server.Commander.PeakCommander;
-import biovis.sierra.server.p2q.QValueCalculator;
+import biovis.sierra.server.peakQuality.SuperDuperQualityCoherentSpaceSmart;
 import biovis.sierra.server.windowFactories.WindowFactoryReaderSerial1ChunkParallelCoherent2;
-
-import htsjdk.samtools.SamReaderFactory;
-
-import parallel4.Parallel;
+import biovislib.parallel4.IterationInt;
+import biovislib.parallel4.IterationParameter;
+import biovislib.parallel4.Parallel;
+import biovislib.parallel4.Parallel2;
+import biovislib.parallel4.ParallelForInt2;
+import biovislib.parallel4.ParallelForParameter;
+import biovislib.parallel4.ParallelizationFactory;
+import biovislib.statistics.PearsonCorrelationParallelFast;
+import biovislib.statistics.p2q.QValueCalculator;
+import biovislib.statistics.p2q.QValueCalculatorHB;
+import biovislib.statistics.p2q.QValueCalculatorStoreyBootStrapSpline;
+import biovislib.statistics.p2q.QValueCalculatorStoreySimple;
 
 import java.io.IOException;
 import java.time.LocalTime;
@@ -45,12 +47,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import parallel4.IterationInt;
-import parallel4.IterationParameter;
-import parallel4.Parallel2;
-import parallel4.ParallelForParameter;
-import parallel4.ParallelForInt2;
-import parallel4.ParallelizationFactory;
 
 /**
  *
@@ -72,15 +68,12 @@ public class SuperDuperPeakCaller {
 
     private PeakCommander pc;
 
-    private PoissonDistributionCollection pdc;
-
     /**
      * Constructor.
      *
-     * @param dm
-     *            data mapper
-     * @param pc
-     *            peak commander
+     * @param dm data mapper
+     * @param pc peak commander
+     * @param chunkSize chunk size
      */
     public SuperDuperPeakCaller(DataMapper dm, PeakCommander pc, int chunkSize) {
         this.mapper = dm;
@@ -96,8 +89,8 @@ public class SuperDuperPeakCaller {
     /**
      * Constructor.
      *
-     * @param dm
-     *            data mapper
+     * @param dm data mapper
+     * @param chunkSize chunk size
      */
     public SuperDuperPeakCaller(DataMapper dm, int chunkSize) {
         this(dm, null, chunkSize);
@@ -116,19 +109,6 @@ public class SuperDuperPeakCaller {
         pf.setThreshold(mapper.getPvaluecutoff());
         log.info("peak factory created");
 
-        /*
-        log.info("establish peak quality");
-        SuperDuperQuality broadQuality = new SuperDuperQuality(mapper, wl,
-                                                               broadList, pf.getPeakListBroad());
-        mapper.setBroadPeakQuality(broadQuality.evaluatePeakList());
-        SuperDuperQuality narrowQuality = new SuperDuperQuality(mapper, wl,
-                                                                narrowList, pf.getPeakListNarrow());
-        mapper.setNarrowPeakQuality(narrowQuality.evaluatePeakList());
-
-        broadList = new PeakList(pf.getPeakListBroad());
-        narrowList = new PeakList(pf.getPeakListNarrow());
-        log.info("peak quality established");
-         */
         log.info("init done");
     }
 
@@ -142,14 +122,10 @@ public class SuperDuperPeakCaller {
     }
 
     /**
-     * Start the peak calling process. Includes two stages: - stage 1: compute
-     * peak calls per replicate - stage 2: combine peak calls
-     *
-     * To change the computation of the window construction, change the line wl
-     * = ... replacing the WindowFactoryClass
-     *
-     * !for non-coherent methods, 'estimate quality mappings' has to be
-     * included!
+     * Start the peak calling process.
+     * Includes two stages:
+     * - stage 1: compute peak calls per replicate
+     * - stage 2: combine peak calls
      *
      * Alternatives for the computation of the final peak quality are available
      *
@@ -161,7 +137,7 @@ public class SuperDuperPeakCaller {
         // log parameters
         Logger log = Logger.getLogger("SuperDuperPeakCaller.start");
         log.info("peak calling started");
-        mapper.setCurrentStep(1);
+        mapper.resetCurrentStep();
         log.log(Level.INFO, "windowSize: {0}", windowSize);
         log.log(Level.INFO, "offset: {0}", windowOffset);
         log.log(Level.INFO, "p-value: {0}", mapper.getPvaluecutoff());
@@ -172,26 +148,9 @@ public class SuperDuperPeakCaller {
         mapper.finalizeReplicateList();
 
         // make windows and count tags for windows
-        // Change this to test the window constructions
-        // A:
-        // wl = WindowFactoryCountTagParallel.constructWindows(mapper, windowSize, windowOffset, pc);
-        // B:
-        // wl = WindowFactoryChromosomeParallel.constructWindows(mapper, windowSize, windowOffset, pc);
-        // C: Chunk - Window - Dataset
-        // wl = WindowFactoryChunkParallelWindowDataset2.constructWindows(mapper, windowSize, windowOffset, pc);
-        // D: Chunk - Dataset - Window
-        // wl = WindowFactoryChunkParallelDataSetWindow.constructWindows(mapper, windowSize, windowOffset, pc);
-        // E-1 -- F-2: Dataset - Chunk - Window
-        // E-1: (fastest)
-        // wl = WindowFactoryReaderSerial2ChunkParallelCoherent.constructWindows(mapper, windowSize, windowOffset, pc);
-        // E-2: (fastest)
-        // wl = WindowFactoryReaderSerial2ChunkParallelCoherent2.constructWindows(mapper, windowSize, windowOffset, pc);
+        // Dataset - Chunk - Window
         // E-3: (fastest, space efficient)
         wl = WindowFactoryReaderSerial1ChunkParallelCoherent2.constructWindows(mapper, windowSize, windowOffset, pc, chunkSize);
-        // F-1:
-        // wl = WindowFactoryReaderSerial1ChunkParallel.constructWindows(mapper, windowSize, windowOffset, pc);
-        // F-2:
-        // wl = WindowFactoryReaderSerial2ChunkParallel.constructWindows(mapper, windowSize, windowOffset, pc);
 
         // For debugging purposes: print window list
         // printWindows(wl);
@@ -199,70 +158,72 @@ public class SuperDuperPeakCaller {
         setProgress(0.25);
         timestamp("Constructing windows");
 
-        // Estimate mapping quality
-        log.info("estimating mapping quality [very IO intensiv]");
-        /*
-        // for coherent window construction: included there
-        // needs to be activated for non coherent window list construction
-        estimateMappingQuality();
-        */
-        log.info("mapping quality estimated");
-        setProgress(0.30);
-        timestamp("Mapping Quality for all Replicates");
-
         // generate poisson distributions for data
         log.info("estimating raw poisson distribution");
-        pdc = new PoissonDistributionCollection(mapper);
-        pdc.estimateLambdas(wl, true);
-        log.info("raw poisson distribution estimated");
-        setProgress(0.35);
-        timestamp("Raw Poisson Distributions for all Replicates");
-
-        // Compute tag count histogram and least square weight
-        log.info("compute tag count histograms and least square weight");
         List<Replicate> replicates = mapper.getReplicates();
         Parallel2 p2 = ParallelizationFactory.getInstance(mapper.getNumCores());
         new ParallelForParameter<>(p2, replicates).loop(
                 new IterationParameter<Replicate>() {
             @Override
             public void iteration(Replicate replicate) {
+                replicate.getBackground().estimateLambda(wl, true);
+                replicate.getExperiment().estimateLambda(wl, true);
+            }
+        });
+        log.info("raw poisson distribution estimated");
+        setProgress(0.30);
+        timestamp("Raw Poisson Distributions for all Replicates");
+
+        // Compute tag count histogram and least square weight
+        log.info("compute tag count histograms and least square weight");
+        new ParallelForParameter<>(p2, replicates).loop(
+                new IterationParameter<Replicate>() {
+            @Override
+            public void iteration(Replicate replicate) {
                 replicate.computeTagCountHistogram(wl);
-                replicate.computeLeastSquaresDistance(pdc.getPoissonsCollection());
+                replicate.computeLeastSquaresDistance();
                 replicate.computeHistogramBins();
 
                 replicate.computeWeight();
             }
         });
         log.info("tag count histograms generated");
-        setProgress(0.40);
+        setProgress(0.35);
         timestamp("Tag Count Distribution / Least Square for all Replicates");
 
         // estimate scaling factors
         log.info("estimate scaling factors and scale experiments");
         estimateScalingFactors();
-        wl.scaleAllExperiments();
+        wl.scaleAllExperiments(mapper);
         log.info("experiments scaled");
-        setProgress(0.45);
+        setProgress(0.40);
         timestamp("Scaling library for all replicates");
 
         // estimate normalized lambdas
         log.info("estimating normalized poisson distribution");
-        pdc.estimateLambdas(wl, false);
+        new ParallelForParameter<>(p2, replicates).loop(
+                new IterationParameter<Replicate>() {
+            @Override
+            public void iteration(Replicate replicate) {
+                replicate.getBackground().estimateLambda(wl, false);
+                replicate.getExperiment().estimateLambda(wl, false);
+            }
+        });
         log.info("normalized poisson distribution estimated");
-        setProgress(0.50);
+        setProgress(0.45);
         timestamp("Normalized Poisson distribution for all replicates");
 
         // generate experiment-wise p-values
         log.info("generating peak calls for single replicates");
         {
-            // PeakMe peakMe = new PeakMe(wl, pdc, mapper);
-            PeakMeSpaceParallel peakMe = new PeakMeSpaceParallel(wl, pdc, mapper);
+            PeakMeSpaceParallel peakMe = new PeakMeSpaceParallel(wl, mapper);
             peakMe.peak();
             peakMe = null;
 
             // System.gc();
         }
         log.info("single peak calls generated");
+        setProgress(0.50);
         timestamp("Single peak calls for all replicates");
 
         calculateQValues(log);
@@ -288,9 +249,9 @@ public class SuperDuperPeakCaller {
 
             QValueCalculator[] qValCalc = new QValueCalculator[mapper.getReplicates().size()];
             for (int replicate = 0; replicate < qValCalc.length; ++replicate) {
-              qValCalc[replicate] = getQValueCalculator();
-              double[] values = getGeneralRawPValues(wl.getWindows(), replicate);
-              qValCalc[replicate].createSortedIndex(values);
+                qValCalc[replicate] = getQValueCalculator();
+                double[] values = getGeneralRawPValues(wl.getWindows(), replicate);
+                qValCalc[replicate].createSortedIndex(values);
             }
 
             // compute q-value correction in parallel
@@ -359,10 +320,8 @@ public class SuperDuperPeakCaller {
         // estimate correlation between the replicates
         log.info("estimating replicate correlation");
         {
-            // PearsonCorrelation pCorr = new PearsonCorrelation(mapper.getReplicates().size(), mapper.getNumCores());
-            // PearsonCorrelationParallel pCorr = new PearsonCorrelationParallel(mapper.getReplicates().size(), mapper.getNumCores());
             PearsonCorrelationParallelFast pCorr = new PearsonCorrelationParallelFast(mapper.getReplicates().size(), mapper.getNumCores());
-            double [][] corr = pCorr.calculateCorrelations(wl);
+            double[][] corr = pCorr.calculateCorrelations(wl);
             mapper.setReplicatePearsonCorrelation(corr);
         }
         log.info("replicate correlation calculated");
@@ -436,44 +395,29 @@ public class SuperDuperPeakCaller {
         if (mapper.isQualityCounting()) {
             log.info("establish peak quality");
 
+            // Alternative for space efficient computation treating space for time
             /*
             //System.err.println("Broad");
-            // Peak parallel
-            //SuperDuperQuality broadQuality = new SuperDuperQuality(
-            // Peak coherent parallel
-            //SuperDuperQualityCoherent broadQuality = new SuperDuperQualityCoherent(
-            // Peak coherent parallel - space
-            //SuperDuperQualityCoherentSpace broadQuality = new SuperDuperQualityCoherentSpace(
             // Peak coherent parallel - space - smart
             SuperDuperQualityCoherentSpaceSmart broadQuality = new SuperDuperQualityCoherentSpaceSmart(
-               mapper, wl, null, broadList);
+               mapper, broadList);
              mapper.setBroadPeakQuality(broadQuality.evaluatePeakList());
-             broadList = new PeakList(broadList);
 
             //System.err.println("Narrow");
-            //SuperDuperQuality narrowQuality = new SuperDuperQuality(
-            //SuperDuperQualityCoherent narrowQuality = new SuperDuperQualityCoherent(
-            //SuperDuperQualityCoherentSpace narrowQuality = new SuperDuperQualityCoherentSpace(
             SuperDuperQualityCoherentSpaceSmart narrowQuality = new SuperDuperQualityCoherentSpaceSmart(
-               mapper, wl, null, narrowList);
+               mapper, narrowList);
              mapper.setNarrowPeakQuality(narrowQuality.evaluatePeakList());
-             narrowList = new PeakList(narrowList);
             */
-
-            //SuperDuperQualityCoherentBN sdqCoherentBN = new SuperDuperQualityCoherentBN(
-            //SuperDuperQualityCoherentBN2Smart sdqCoherentBN = new SuperDuperQualityCoherentBN2Smart(
+            // Alternative for time efficient computation treating time for space
             SuperDuperQualityCoherentBN3Smart sdqCoherentBN = new SuperDuperQualityCoherentBN3Smart(
-                    mapper, wl, broadList, narrowList);
+                    mapper, broadList, narrowList);
             PeakQuality pqNarrow = new PeakQuality();
             PeakQuality pqBroad = new PeakQuality();
             sdqCoherentBN.evaluatePeakList(pqBroad, pqNarrow);
             mapper.setNarrowPeakQuality(pqNarrow);
             mapper.setBroadPeakQuality(pqBroad);
-            narrowList = new PeakList(narrowList);
-            broadList = new PeakList(broadList);
 
             // System.gc();
-
             log.info("peak quality established");
         }
         setProgress(0.90);
@@ -521,13 +465,12 @@ public class SuperDuperPeakCaller {
      */
     public PeakFactory restart(DataMapper mapper) {
         Logger log = Logger.getLogger("SuperDuperPeakCaller.restart");
-        mapper.setCurrentStep(mapper.getCurrentStep() + 1);
+        mapper.incrementCurrentStep();
         mapper.finalizeReplicateList();
 
         log.info("Restarting Multi Peak Calling");
         try {
             this.mapper = mapper;
-            wl.setDataMapper(mapper);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -553,32 +496,6 @@ public class SuperDuperPeakCaller {
         PeakFactory pf = combinedReplicatesPart(log);
 
         return pf;
-    }
-
-    /**
-     * Compute Phread score values.
-     *
-     * @throws IOException
-     *             in case of IO problems
-     */
-    private void estimateMappingQuality() throws IOException {
-        // Parralelization does not reduce computation time
-        /*
-         * Parallel2 parallel = new
-         * Parallel2(mapper.getNumCoresMappingQuality()); new
-         * ParallelForInt2(parallel, 0, mapper.getReplicates().size()).loop(new
-         * IterationInt() {
-         *
-         * @Override public void iteration(int index) { final SamReaderFactory
-         * samReaderDefaultFactory = SamReaderFactory.makeDefault();
-         * mapper.getReplicates().get(index).computeQualityCounts(samReaderDefaultFactory); } });
-         */
-
-        final SamReaderFactory samReaderDefaultFactory = SamReaderFactory.makeDefault();
-        for (Replicate r : mapper.getReplicates()) {
-            r.computeQualityCounts(samReaderDefaultFactory);
-        }
-        // System.gc();
     }
 
     /**
@@ -622,15 +539,6 @@ public class SuperDuperPeakCaller {
             command[1] = progress;
             pc.sendCommand(command);
         }
-    }
-
-    /**
-     * Get data mapper
-     *
-     * @return data mapper
-     */
-    public DataMapper getMapper() {
-        return mapper;
     }
 
     /**

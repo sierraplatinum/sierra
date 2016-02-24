@@ -27,7 +27,6 @@ import biovis.sierra.data.peakcaller.TagCountHistogram;
 
 import java.util.List;
 
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.Axis;

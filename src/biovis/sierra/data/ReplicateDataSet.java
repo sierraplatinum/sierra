@@ -18,18 +18,10 @@
 package biovis.sierra.data;
 
 import biovis.sierra.data.peakcaller.TagCountHistogram;
+import biovis.sierra.data.windows.Window;
 import biovis.sierra.data.windows.WindowList;
 
-import htsjdk.samtools.SAMRecord;
-import htsjdk.samtools.SAMRecordIterator;
-import htsjdk.samtools.SamReader;
-import htsjdk.samtools.SamReaderFactory;
-
 import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-
-import org.apache.commons.math3.distribution.PoissonDistribution;
 
 /**
  *
@@ -40,10 +32,15 @@ public class ReplicateDataSet {
     private String description;
     private int index;
 
+    // Poisson Distribution: raw and scaled data
+    private transient ReplicateDataSetPoissonDistribution poissonDistribution = null;
     private double lambda;
     private double lambdaRaw;
 
+    // tag count histogram
     private TagCountHistogram tagCountHistogram;
+
+    // quality boxplot
     private int medianQuality;
     private int upperQualityQuartile;
     private int lowerQualityQuartile;
@@ -56,45 +53,6 @@ public class ReplicateDataSet {
      * Constructor.
      */
     public ReplicateDataSet() {
-    }
-
-    /**
-     * Compute quality counts.
-     *
-     * @param samReaderDefaultFactory sam reader default factory
-     */
-    public void computeQualityCounts(
-            final SamReaderFactory samReaderDefaultFactory
-    ) {
-        int tagCount = 0;
-
-        int[] qualitycounts = new int[41];
-        for (int i = 0; i < qualitycounts.length; i++) {
-            qualitycounts[i] = 0;
-        }
-        //total number of qualities
-        long totalcounts = 0;
-        //count
-        try (SamReader sam = samReaderDefaultFactory.open(new File(description))) {
-            try (SAMRecordIterator it = sam.iterator()) {
-                while (it.hasNext()) {
-                    SAMRecord record = it.next();
-                    if (record.getReadUnmappedFlag() == false) {
-                        tagCount++;
-                        byte[] qualities = record.getBaseQualities();
-                        for (byte b : qualities) {
-                            int qIndex = (int) b;
-                            qualitycounts[qIndex]++;
-                            totalcounts++;
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        computeQuality(totalcounts, qualitycounts, tagCount);
     }
 
     /**
@@ -151,13 +109,12 @@ public class ReplicateDataSet {
     /**
      * Compute least squares distance for given Poisson distributions.
      *
-     * @param poissonsCollection collection of Poisson distributions
      * @return least squares distance
      */
-    public double computeLeastSquaresDistance(Map<Integer, PoissonDistribution> poissonsCollection) {
+    public double computeLeastSquaresDistance() {
         double leastSquare = 0.0;
         for (int i = 0; i < tagCountHistogram.getMaxCount(); i++) {
-            double dist = tagCountHistogram.getCount(i) - poissonsCollection.get(index).probability(i);
+            double dist = tagCountHistogram.getCount(i) - poissonDistribution.getProbability(i);
             leastSquare += dist * dist;
         }
         leastSquare = Math.sqrt(leastSquare);
@@ -170,7 +127,7 @@ public class ReplicateDataSet {
     }
 
     /**
-     * Get description-
+     * Get description.
      *
      * @return description
      */
@@ -192,12 +149,27 @@ public class ReplicateDataSet {
     }
 
     /**
-     * Get lambda.
+     * Estimate normalized lambdas.
      *
-     * @return lambda
+     * @param windows list of windows
+     * @param raw true iff raw lambda is set
      */
-    public double getLambda() {
-        return lambda;
+    public void estimateLambda(
+        WindowList windows,
+        boolean raw
+    ) {
+        double lambda = 0.0;
+
+        for (Window w : windows.getWindows()) {
+            lambda += w.getTagCount(index);
+        }
+        double windowCount = windows.getSize();
+        if (raw) {
+            poissonDistribution = new ReplicateDataSetPoissonDistribution(lambda / windowCount);
+//        } else {
+//            poissonDistribution = new ReplicateDataSetPoissonDistribution();
+        }
+        setLambda(lambda / windowCount, raw);
     }
 
     /**
@@ -215,12 +187,41 @@ public class ReplicateDataSet {
     }
 
     /**
-     * Get raw lambda-
+     * Get lambda.
+     *
+     * @return lambda
+     */
+    public double getLambda() {
+        return lambda;
+    }
+
+    /**
+     * Get raw lambda.
      *
      * @return raw lambda
      */
     public double getLambdaRaw() {
         return lambdaRaw;
+    }
+
+    /**
+     * Get lambda from PoissonDistribution.
+     *
+     * @return lambda from PoissonDistribution
+     */
+    public double getLambdaFromPoisson() {
+        return poissonDistribution.getLambdaFromPoisson();
+    }
+
+    /**
+     * Compute and return p-value.
+     *
+     * @param lambda lambda
+     * @param counts counts
+     * @return p-value
+     */
+    public double getPValue(double lambda, double counts) {
+        return poissonDistribution.getPValue(lambda, counts);
     }
 
     /**

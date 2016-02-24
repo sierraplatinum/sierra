@@ -27,10 +27,6 @@ import java.util.TreeMap;
 public class WindowFactoryChunkMap
         extends TreeMap<Integer, String> {
 
-    protected final static int DEFAULT_CHUNK_SIZE = 10000; // is best
-    // protected final static int DEFAULT_CHUNK_SIZE = 15000;
-
-    private int chunkSize = DEFAULT_CHUNK_SIZE;
     private int chunks = 0;
 
     /**
@@ -39,11 +35,13 @@ public class WindowFactoryChunkMap
      * @param genome genome
      * @param windowSize windowSize
      * @param offset offset
+     * @param chunkSize chunk size
      */
     public WindowFactoryChunkMap(
             Map<String, Integer> genome,
             int windowSize,
-            int offset
+            int offset,
+            int chunkSize
     ) {
         // construct TreeMap to find corresponding chromosome
         int startChunk = 0;

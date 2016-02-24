@@ -122,6 +122,9 @@ public class QualityCounter {
         }
     }
 
+    /**
+     * Adjust quality scale for different sequencing types
+     */
     public void adjust() {
         if (max > 41) {
             // Illumina 1.3 or 1.5

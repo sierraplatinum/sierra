@@ -19,19 +19,17 @@ package biovis.sierra.server.peakMe;
 
 import biovis.sierra.data.DataMapper;
 import biovis.sierra.data.Replicate;
-import biovis.sierra.data.peakcaller.PoissonDistributionCollection;
 import biovis.sierra.data.windows.ChromosomeWindowRange;
 import biovis.sierra.data.windows.Window;
 import biovis.sierra.data.windows.WindowList;
 import biovis.sierra.data.windows.NeighborhoodLambda;
+import biovislib.parallel4.IterationParameter;
+import biovislib.parallel4.Parallel2;
+import biovislib.parallel4.ParallelForParameter;
+import biovislib.parallel4.ParallelizationFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import parallel4.IterationParameter;
-import parallel4.Parallel2;
-import parallel4.ParallelForParameter;
-import parallel4.ParallelizationFactory;
 
 /**
  *
@@ -40,23 +38,19 @@ import parallel4.ParallelizationFactory;
 public class PeakMeSpaceParallel {
 
     private WindowList windowList;
-    private PoissonDistributionCollection collection;
     private DataMapper mapper;
 
     /**
      * Constructor.
      *
      * @param wl window list
-     * @param pdc poisson distribution
      * @param dm data mapper
      */
     public PeakMeSpaceParallel(
             WindowList wl,
-            PoissonDistributionCollection pdc,
             DataMapper dm
     ) {
         windowList = wl;
-        collection = pdc;
         mapper = dm;
     }
 
@@ -96,10 +90,10 @@ public class PeakMeSpaceParallel {
                         expTag = replicate.getExperiment().getIndex();
                         controlTag = replicate.getBackground().getIndex();
 
-                        lambda = Math.max(Math.max(collection.getLambdaByTag(controlTag), lambda1k[controlTag]),
+                        lambda = Math.max(Math.max(replicate.getBackground().getLambdaFromPoisson(), lambda1k[controlTag]),
                                           Math.max(lambda5k[controlTag], lambda10k[controlTag]));
                         count = w.getTagCount(expTag);
-                        pval = collection.getPValue(controlTag, lambda, count);
+                        pval = replicate.getBackground().getPValue(lambda, count);
                         w.setRawPValue(replicate.getIndex(), pval);
                     }
                     ++index;

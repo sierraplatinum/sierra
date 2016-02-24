@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import com.google.gson.Gson;
-import com.sun.javafx.tk.FontLoader;
-import com.sun.javafx.tk.Toolkit;
 
 import biovis.sierra.client.Commander.PeakCommander;
 import biovis.sierra.client.GUI.GUIHelper.SpinnerValue;
@@ -35,10 +33,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -62,8 +58,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Translate;
 /**
 *
 * @author Daniel Gerighausen
@@ -352,7 +346,7 @@ public void draw(double[][] correlations)
         ColumnConstraints headerCol = new ColumnConstraints();
         headerCol.setPrefWidth(columns);
         RowConstraints headerRow = new RowConstraints();
-        headerRow.setPrefHeight(columns);;
+        headerRow.setPrefHeight(columns);
         
 
         RowConstraints header = new RowConstraints();

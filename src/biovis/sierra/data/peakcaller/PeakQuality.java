@@ -19,6 +19,8 @@ package biovis.sierra.data.peakcaller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -26,9 +28,9 @@ import java.util.Set;
  * @author Lydia Mueller
  */
 public class PeakQuality {
-	ArrayList<IntBoxplotData> background;
-	ArrayList<IntBoxplotData> experiment;
-	HashMap<Integer,Integer> replicates;
+	private List<IntBoxplotData> background;
+	private List<IntBoxplotData> experiment;
+	private Map<Integer,Integer> replicates;
 
         /**
          * Constructor.
@@ -37,26 +39,6 @@ public class PeakQuality {
 		replicates = new HashMap<>();
 		background = new ArrayList<>();
 		experiment = new ArrayList<>();
-	}
-
-	public ArrayList<IntBoxplotData> getBackground() {
-		return background;
-	}
-
-        public void setBackground(ArrayList<IntBoxplotData> background) {
-		this.background = background;
-	}
-
-        public ArrayList<IntBoxplotData> getExperiment() {
-		return experiment;
-	}
-
-        public void setExperiment(ArrayList<IntBoxplotData> experiment) {
-		this.experiment = experiment;
-	}
-
-	public int getNumberOfReplicates(){
-		return replicates.size();
 	}
 
 	public Set<Integer> getReplicatesWithQuality(){

@@ -21,12 +21,8 @@ import biovis.sierra.server.SuperDuperPeakCaller;
 import de.kl.vis.lib.remoteControl.CommandListener;
 import de.kl.vis.lib.remoteControl.CommandListenerException;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Logger;
 
-import static java.util.concurrent.TimeUnit.*;
 /**
  *
  * @author Daniel Gerighausen
@@ -107,13 +103,8 @@ public class SierraService {
 
 		}
 
-
 		port = argsParser.getPort();
 		startListener();
-
-
-
-
 	}
 
 
@@ -140,10 +131,5 @@ public class SierraService {
 				e.printStackTrace();
 			}
 		}
-
 	}
-
-
-
-
 }

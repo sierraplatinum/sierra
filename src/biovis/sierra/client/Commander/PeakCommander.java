@@ -17,7 +17,6 @@ package biovis.sierra.client.Commander;
 
 import java.io.IOException;
 
-import biovis.sierra.client.Commander.PeakDispatcher;
 import biovis.sierra.client.GUI.FXMLDocumentController;
 import biovis.sierra.client.GUI.GUIHelper.RandomDNA;
 import de.kl.vis.lib.remoteControl.AddressContainer;

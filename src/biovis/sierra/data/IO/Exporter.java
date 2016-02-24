@@ -210,7 +210,6 @@ public class Exporter {
 	 * @param filename file name
 	 * @param replicates replicates
 	 * @param mapper data mapper
-	 * @param peakmode peak mode
 	 */
 	public static void exportReplicates(String filename, List<Replicate> replicates, DataMapper mapper)
 	{

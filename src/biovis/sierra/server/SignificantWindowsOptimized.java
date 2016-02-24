@@ -19,7 +19,6 @@ package biovis.sierra.server;
 
 import biovis.sierra.data.DataMapper;
 import biovis.sierra.data.Replicate;
-import biovis.sierra.data.peakcaller.SignificantWindowHistogram;
 import biovis.sierra.data.windows.Window;
 import biovis.sierra.data.windows.WindowList;
 
@@ -101,36 +100,5 @@ public class SignificantWindowsOptimized {
             }
             replicates.get(i).setSignificantWindows(sigCount[i]);
         }
-
-        // Compute median
-        List<Integer> sorted = new ArrayList<>();
-        for (int i : sigCount) {
-            sorted.add(i);
-        }
-        Collections.sort(sorted);
-        int median = sorted.get(sorted.size() / 2);
-
-        // Compute histogram
-        int counter = 0;
-        List<Integer> histX = new ArrayList<>();
-        List<Integer> histY = new ArrayList<>();
-        histX.add(sorted.get(0));
-        histY.add(1);
-        for (int i = 1; i < sorted.size(); i++) {
-            if (histX.get(counter) == sorted.get(i)) {
-                histY.set(counter, histY.get(counter) + 1);
-            } else {
-                counter++;
-                histX.add(sorted.get(i));
-                histY.add(1);
-            }
-        }
-        SignificantWindowHistogram swh
-                = new SignificantWindowHistogram(
-                        histX,
-                        histY,
-                        median);
-
-        mapper.setSignificantWindowHistogram(swh);
     }
 }

@@ -39,7 +39,7 @@ public class PeakCommander {
 
 	private String serverHost;
 	private int hostPort;
-	private HashMap<String, Commander> nCommanders = new HashMap<String, Commander>();
+	private HashMap<String, Commander> nCommanders = new HashMap<>();
 	private Commander commander = null;
 
 	private Logger logger = Logger.getLogger("PeakCommander");
@@ -98,7 +98,7 @@ public class PeakCommander {
 		}
 
 		Set<Entry<String, Commander>> entrySet = nCommanders.entrySet();
-		ArrayList<Entry<String, Commander>> entryList= new ArrayList<Entry<String,Commander>>();
+		ArrayList<Entry<String, Commander>> entryList= new ArrayList<>();
 		entryList.addAll(entrySet);
 //		System.err.println(entryList.size());
 		for(int i = 0; i < entryList.size(); i++)

@@ -28,17 +28,14 @@ import com.google.gson.Gson;
 import biovis.sierra.data.DataMapper;
 import biovis.sierra.data.IO.Exporter;
 import biovis.sierra.data.peakcaller.PeakList;
-import biovis.sierra.data.windows.Window;
 import biovis.sierra.server.PeakFactory;
 import biovis.sierra.server.SuperDuperPeakCaller;
+import biovislib.parallel4.ParallelizationFactory;
 import de.kl.vis.lib.remoteControl.CommandDispatcherInterface;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
-
-import parallel4.ParallelizationFactory;
-
 
 /**
  *
@@ -153,7 +150,7 @@ public class PeakDispatcher
                 break;
             case "recalc":
                 log.info("Recalculation");
-                recalculate(command);
+                recalculate();
                 break;
             default:
                 log.log(Level.INFO, "Received unknown command: {0}", scommand);
@@ -184,9 +181,8 @@ public class PeakDispatcher
     /**
      * Recalculate.
      *
-     * @param command command to execute
      */
-    private void recalculate(Object[] command) {
+    private void recalculate() {
         busy = true;
 
         recalc = new Recalculation();
@@ -435,10 +431,12 @@ public class PeakDispatcher
             return false;
         }
 
+        /*
         log.info("Clear unused information in data mapper");
         server.getMapper().clearDuplicates();
         log.info("Unused information in data mapper cleared");
         timestamp("Clear unused information in Data Mapper");
+        */
 
         log.info("Start export peaks and mapper");
         String prefix = server.getMapper().getJobName() + "-" + server.getMapper().getCurrentStep() + "-";
@@ -458,11 +456,13 @@ public class PeakDispatcher
      * @param sdp SuperDuperPeakCaller
      */
     private void exportState(Logger log, SuperDuperPeakCaller sdp) {
+        /*
         log.info("Start export state");
         log.info("Clear unused information in windows");
         for (Window w : sdp.getWl().getWindows()) {
             w.installLinux();
         }
+        */
         log.info("Export state");
         String prefix = server.getMapper().getJobName() + "-" + server.getMapper().getCurrentStep() + "-";
         Exporter.exportWindows(prefix + "state.sierra", sdp.getWl(), server.getMapper());
@@ -522,7 +522,7 @@ public class PeakDispatcher
                 log.info("Calculation done");
                 if(batchMode)
                 {
-                	System.exit(0);;
+                	System.exit(0);
                 }
                 
                 sendDataMapper();
@@ -610,6 +610,5 @@ public class PeakDispatcher
 
 	public void setBatch(boolean batchMode) {
 		this.batchMode = batchMode;
-		
 	}
 }

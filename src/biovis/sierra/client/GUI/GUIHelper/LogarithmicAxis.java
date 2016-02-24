@@ -223,7 +223,7 @@ public class LogarithmicAxis extends ValueAxis<Number> {
 		private static final long serialVersionUID = 7973825992270560204L;
 
 		/**
-		 * @param string
+		 * @param message
 		 */
 		public IllegalLogarithmicRangeException(String message) {
 			super(message);

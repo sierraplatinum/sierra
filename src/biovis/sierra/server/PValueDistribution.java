@@ -21,10 +21,10 @@ import biovis.sierra.data.DataMapper;
 import biovis.sierra.data.Replicate;
 import biovis.sierra.data.windows.Window;
 import biovis.sierra.data.windows.WindowList;
+import biovislib.parallel4.Tuple;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import parallel4.Tuple;
 
 /**
  *

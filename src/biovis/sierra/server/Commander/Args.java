@@ -54,7 +54,7 @@ public class Args {
 		state = "";
 		clientConfig = "";
 		port = 9753;
-		chunkSize = 1000;
+		chunkSize = 10000;
 		ioThreads =  6;
 	}
 

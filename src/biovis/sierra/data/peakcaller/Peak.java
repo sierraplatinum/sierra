@@ -17,7 +17,6 @@
  */
 package biovis.sierra.data.peakcaller;
 
-import java.util.Vector;
 
 import biovis.sierra.data.windows.Window;
 import java.util.ArrayList;

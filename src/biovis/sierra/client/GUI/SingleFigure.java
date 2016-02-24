@@ -16,7 +16,6 @@
 package biovis.sierra.client.GUI;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 

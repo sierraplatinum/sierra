@@ -34,7 +34,7 @@ public class NeighborhoodLambda {
 
     private List<Replicate> replicates = null;
 
-    double tags[];
+    private double tags[];
 
     /**
      * Constructor

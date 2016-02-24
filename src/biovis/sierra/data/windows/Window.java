@@ -17,18 +17,12 @@
  */
 package biovis.sierra.data.windows;
 
-import htsjdk.samtools.SAMRecord;
-import htsjdk.samtools.SamReader;
-import htsjdk.samtools.util.CloseableIterator;
-import htsjdk.samtools.util.Interval;
-import htsjdk.samtools.util.SamRecordIntervalIteratorFactory;
 
 import biovis.sierra.data.Replicate;
+import biovislib.statistics.CorrelationItem;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import biovis.sierra.server.correlation.CorrelationItem;
 
 /**
  *
@@ -42,11 +36,8 @@ public class Window
     private int start;
     private int end;
 
-    //Iterator Factory -- required to get an iterator of overlapping reads for a given interval
-    private static SamRecordIntervalIteratorFactory samRecordIntervalIteratorFactory = new SamRecordIntervalIteratorFactory();
-
     //tag counts -- as double since some of the tag counts have to be normalized
-    private double[] tags;
+    private transient double[] tags;
 
     // raw p-values for single peak calls
     private double[] rawPValues;
@@ -55,10 +46,10 @@ public class Window
     private double finalRawPValue;
 
     //p-values for single peak calls
-    private double[] pValues;
+    private transient double[] pValues;
 
     //combined p-value
-    private double finalPValue;
+    private transient double finalPValue;
 
     /**
      * window object for given genomic location
@@ -108,28 +99,6 @@ public class Window
                 pValues[i] = 1.0;//by default not significant at all
              
             }
-    }
-
-    /**
-     * count tags for a  given data set using the given sam reader
-     *
-     * @param dataset data set which should be counted
-     * @param sam sam reader used to get sam records
-     */
-    public void count(Integer dataset, SamReader sam) {
-        //count
-        List<Interval> intervalList = new ArrayList<>();
-        intervalList.add(new Interval(chr, start, end));
-        double tagsNum;
-        try (CloseableIterator<SAMRecord> overlapping = samRecordIntervalIteratorFactory.makeSamRecordIntervalIterator(sam, intervalList, true)) {
-            tagsNum = 0.0;
-            while (overlapping.hasNext()) {
-                tagsNum++;
-                overlapping.next();
-            }
-        }
-
-        tags[dataset] = tagsNum;
     }
 
     /**
@@ -193,19 +162,7 @@ public class Window
     }
 
     /**
-     * sums up all tag counts and returns this value
-     * @return sum of tag counts
-     */
-    public double getTagSum() {
-        double sum = 0.0;
-        for (double tag : tags) {
-            sum += tag;
-        }
-        return sum;
-    }
-
-    /**
-     * set the pvalue of data set to given p-value
+     * set the p-value of data set to given p-value
      * @param dataset dataset to change
      * @param val new p-value
      */
@@ -214,36 +171,11 @@ public class Window
     }
 
     /**
-     * get all p-values of single peak calls
-     * @return double array with p-values
-     */
-    public double[] getRawPValueList() {
-        return pValues;
-    }
-
-    /**
-     * get combined p-value
-     * @return double representing the final p-value
-     */
-    public double getFinalRawPValue() {
-        return finalRawPValue;
-    }
-
-    /**
      * setter for the final p-value
-     * @param finalPValue new final p-value
+     * @param finalRawPValue final raw p-value
      */
     public void setFinalRawPValue(double finalRawPValue) {
         this.finalRawPValue = finalRawPValue;
-    }
-
-    /**
-     * set the pvalue of data set to given p-value
-     * @param dataset dataset to change
-     * @param val new p-value
-     */
-    public void setPValue(int dataset, double val) {
-        pValues[dataset] = val;
     }
 
     /**
@@ -262,7 +194,7 @@ public class Window
     public double [] getCorrelationValues() {
         return getPValueList();
     }
-    
+
     /**
      * get combined p-value
      * @return double representing the final p-value
@@ -272,30 +204,12 @@ public class Window
     }
 
     /**
-     * setter for the final p-value
-     * @param finalPValue new final p-value
-     */
-    public void setFinalPValue(double finalPValue) {
-        this.finalPValue = finalPValue;
-    }
-
-    /**
      * print all tag counts to stderr for debugging purposes
      */
     public void printTagCounts() {
         for (int i = 0; i < tags.length; i++) {
             System.err.println(tags[i]);
         }
-    }
-
-    /**
-     * Clear information of window that does not need to be exported
-     */
-    public void installLinux() {
-        // remove tags; only p values are exported
-        tags = null;
-        pValues = null;
-        finalPValue = 0;
     }
 
     @Override

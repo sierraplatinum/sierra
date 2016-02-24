@@ -1,6 +1,5 @@
 package biovis.sierra.client.GUI.GUIHelper;
 
-import java.util.List;
 import java.util.Map.Entry;
 
 import javafx.scene.chart.XYChart;

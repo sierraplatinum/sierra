@@ -24,7 +24,11 @@ import biovis.sierra.data.Replicate;
 import biovis.sierra.data.peakcaller.Peak;
 import biovis.sierra.data.peakcaller.PeakList;
 import biovis.sierra.data.peakcaller.PeakQuality;
-import biovis.sierra.data.windows.WindowList;
+import biovislib.parallel4.IterationParameter;
+import biovislib.parallel4.Parallel2;
+import biovislib.parallel4.ParallelForParameter;
+import biovislib.parallel4.ParallelizationFactory;
+import biovislib.parallel4.Tuple;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SamReader;
@@ -42,11 +46,6 @@ import java.util.Vector;
 import java.util.logging.Logger;
 
 import java.util.logging.Level;
-import parallel4.IterationParameter;
-import parallel4.Parallel2;
-import parallel4.ParallelForParameter;
-import parallel4.ParallelizationFactory;
-import parallel4.Tuple;
 
 /**
  *
@@ -65,7 +64,6 @@ public class SuperDuperQualityCoherentBN3Smart {
     private static Comparator<Read> compareReadByEnd = (s1, s2) -> Integer.compare(s1.getEnd(), s2.getEnd());
 
     private DataMapper dm;
-    private WindowList wl;
     private PeakList peakListBroad;
     private PeakList peakListNarrow;
 
@@ -73,18 +71,15 @@ public class SuperDuperQualityCoherentBN3Smart {
      * Constructor.
      *
      * @param dm data mapper
-     * @param wl window list
-     * @param peakListBroad broad list with peaks
-     * @param peakListNarrow narrow list with peaks
+     * @param peakListBroad broad peak list
+     * @param peakListNarrow narrow peak list
      */
     public SuperDuperQualityCoherentBN3Smart(
             DataMapper dm,
-            WindowList wl,
             PeakList peakListBroad,
             PeakList peakListNarrow
     ) {
         this.dm = dm;
-        this.wl = wl;
         this.peakListBroad = peakListBroad;
         this.peakListNarrow = peakListNarrow;
     }
@@ -146,7 +141,10 @@ public class SuperDuperQualityCoherentBN3Smart {
      * Calculate median peak and replicate quality (one step).
      *
      * @param file filename
-     * @param pl peak list
+     * @param plBroad broad peak list
+     * @param plNarrow narrow peak list
+     * @param medianQualitiesBroad median quality of broad peaks
+     * @param medianQualitiesNarrow median quality of narrow peaks
      * @param r_index replicate index
      * @param exp true iff is experiment
      * @return qualities for replicate
@@ -356,7 +354,7 @@ public class SuperDuperQualityCoherentBN3Smart {
                                 }
                             }
 
-                            int medianQuality = computeQualitiesForPeak(peak, recordsEnd);
+                            int medianQuality = computeQualitiesForReads(recordsEnd);
 
                             if (exp) {
                                 peak.addExperimentQuality(r_index, medianQuality);
@@ -379,12 +377,10 @@ public class SuperDuperQualityCoherentBN3Smart {
     /**
      * Compute qualities for one peak.
      *
-     * @param p peak
      * @param reads all reads
      * @return qualities for peak
      */
-    private int computeQualitiesForPeak(
-            Peak p,
+    private int computeQualitiesForReads(
             Iterable<Read> reads
     ) {
         QualityCounter qc = new QualityCounter();

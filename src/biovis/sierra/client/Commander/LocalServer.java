@@ -23,18 +23,12 @@ import biovis.sierra.server.Commander.SierraServer;
 */
 public class LocalServer {
 
-
-
 	private static Thread server = new Thread();
 
 	public static void startLocalServer()
-	{
-
-			
-		
+	{	
 			server = new Thread(new Runnable()
 			{
-
 				@Override
 				public void run() {
 
@@ -46,10 +40,7 @@ public class LocalServer {
 						return;
 						
 					}
-
-
 				}
-
 			});
 
 			server.start();
@@ -59,17 +50,12 @@ public class LocalServer {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//			System.err.println("This thread is running?" +isRunning());
-			
+//			System.err.println("This thread is running?" +isRunning());		
 		}
-	
 
 	public static boolean isRunning()
 	{
 		return server.isAlive();
 
 	}
-
-
-
 }

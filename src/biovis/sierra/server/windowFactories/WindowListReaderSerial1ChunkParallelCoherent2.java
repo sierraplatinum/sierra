@@ -46,7 +46,7 @@ public class WindowListReaderSerial1ChunkParallelCoherent2
      * type, as well as mapping between experiments and controls
      */
     public WindowListReaderSerial1ChunkParallelCoherent2(DataMapper dm) {
-        super(dm);
+        super();
         windowList = new Hashtable<>();
     }
 

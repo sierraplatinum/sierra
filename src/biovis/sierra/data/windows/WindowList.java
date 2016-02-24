@@ -19,8 +19,12 @@ package biovis.sierra.data.windows;
 
 import biovis.sierra.data.DataMapper;
 import biovis.sierra.data.Replicate;
-import biovis.sierra.server.correlation.CorrelationItem;
-import biovis.sierra.server.correlation.CorrelationList;
+import biovislib.parallel4.IterationInt;
+import biovislib.parallel4.Parallel2;
+import biovislib.parallel4.ParallelForInt2;
+import biovislib.parallel4.ParallelizationFactory;
+import biovislib.statistics.CorrelationItem;
+import biovislib.statistics.CorrelationList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,11 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import parallel4.IterationInt;
-import parallel4.Parallel2;
-import parallel4.ParallelForInt2;
-import parallel4.ParallelizationFactory;
 
 /**
  *
@@ -46,18 +45,11 @@ public class WindowList
     // window list created in all approaches
     protected ArrayList<Window> windows;
 
-    // data mapper with data information
-    protected DataMapper mapper;
-
     /**
      * Constructor for window list
      *
-     * @param dm data mapper storing mapping of data sets to file names and
-     * type, as well as mapping between experiments and controls
      */
-    public WindowList(DataMapper dm) {
-        mapper = dm;
-
+    public WindowList() {
         //init window lists
         windows = new ArrayList<>();
     }
@@ -97,8 +89,9 @@ public class WindowList
      * corresponding scaling factors resulting in an equally library size for
      * control and experiment. This is required since Poisson distribution only
      * models experiments with same library size as control.
+     * @param mapper data mapper
      */
-    public void scaleAllExperiments() {
+    public void scaleAllExperiments(DataMapper mapper) {
         final List<Replicate> replicates = mapper.getReplicates();
         Parallel2 p2 = ParallelizationFactory.getInstance(mapper.getNumCores());
         new ParallelForInt2(p2, 0, windows.size()).loop(
@@ -151,34 +144,16 @@ public class WindowList
      *
      * @return number of windows
      */
+    @Override
     public int getSize() {
         return windows.size();
-    }
-
-    /**
-     * Get current data mapper
-     *
-     * @return dataMapper
-     */
-    public DataMapper getDataMapper() {
-        return mapper;
-    }
-
-    /**
-     * set new data mapper
-     *
-     * @param mapper data mapper
-     */
-    public void setDataMapper(DataMapper mapper) {
-        this.mapper = mapper;
     }
 
     @Override
     public String toString() {
         final int maxLen = 10;
         return "WindowList [windows="
-               + (windows != null ? toString(windows, maxLen) : null)
-               + ", mapper=" + mapper + "]";
+               + (windows != null ? toString(windows, maxLen) : null);
     }
 
     /**

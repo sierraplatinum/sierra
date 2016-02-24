@@ -133,9 +133,9 @@ public class Importer {
 
 			content = br.readLine();
 
-			DataMapper obj = gson.fromJson(content, DataMapper.class);
-			controller.setDataMapper(obj);
-			WindowList wList = new WindowList(obj);
+			DataMapper mapper = gson.fromJson(content, DataMapper.class);
+			controller.setDataMapper(mapper);
+			WindowList wList = new WindowList();
 
 			while ((content = br.readLine()) != null)
 			{
@@ -167,9 +167,9 @@ public class Importer {
 
 			content = br.readLine();
 
-			DataMapper obj = gson.fromJson(content, DataMapper.class);
-			controller.setMapper(obj);
-			WindowList wList = new WindowList(obj);
+			DataMapper mapper = gson.fromJson(content, DataMapper.class);
+			controller.setMapper(mapper);
+			WindowList wList = new WindowList();
 
 			while ((content = br.readLine()) != null)
 			{

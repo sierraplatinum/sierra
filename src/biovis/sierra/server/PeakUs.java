@@ -18,14 +18,13 @@
 package biovis.sierra.server;
 
 import biovis.sierra.data.DataMapper;
-import biovis.sierra.data.peakcaller.InverseNormalMethod;
 import biovis.sierra.data.windows.Window;
 import biovis.sierra.data.windows.WindowList;
-import parallel4.IterationInt;
-import parallel4.Parallel2;
-import parallel4.ParallelForInt;
-import parallel4.ParallelForInt2;
-import parallel4.ParallelizationFactory;
+import biovislib.parallel4.IterationInt;
+import biovislib.parallel4.Parallel2;
+import biovislib.parallel4.ParallelForInt2;
+import biovislib.parallel4.ParallelizationFactory;
+import biovislib.statistics.InverseNormalMethod;
 
 /**
  *

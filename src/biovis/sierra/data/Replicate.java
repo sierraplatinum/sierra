@@ -17,17 +17,14 @@
  */
 package biovis.sierra.data;
 
-import biovis.sierra.data.peakcaller.INMReplicate;
 import biovis.sierra.data.windows.WindowList;
-
-import htsjdk.samtools.SamReaderFactory;
+import biovislib.parallel4.Tuple;
+import biovislib.statistics.INMReplicate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.math3.distribution.PoissonDistribution;
-import parallel4.Tuple;
 
 /**
  *
@@ -56,6 +53,7 @@ public class Replicate
 
     /**
      * Constructor.
+     * @param name
      */
     public Replicate(String name) {
         scalingFactor = 1.0;
@@ -76,17 +74,6 @@ public class Replicate
     }
 
     /**
-     * Compute quality counts.
-     * @param samReaderDefaultFactory 
-     */
-    public void computeQualityCounts(final SamReaderFactory samReaderDefaultFactory) {
-        // Experiment
-        experiment.computeQualityCounts(samReaderDefaultFactory);
-        // Background
-        background.computeQualityCounts(samReaderDefaultFactory);
-    }
-
-    /**
      * create tag count histogram from window list
      *
      * @param wl window list
@@ -101,13 +88,11 @@ public class Replicate
     /**
      * Compute least squares distance.
      *
-     * @param poissonsCollection collection of Poisson distributions
      */
     public void computeLeastSquaresDistance(
-            Map<Integer, PoissonDistribution> poissonsCollection
     ) {
-        double bgrLeastSquare = background.computeLeastSquaresDistance(poissonsCollection);
-        double expLeastSquare = experiment.computeLeastSquaresDistance(poissonsCollection);
+        double bgrLeastSquare = background.computeLeastSquaresDistance();
+        double expLeastSquare = experiment.computeLeastSquaresDistance();
         leastSquareDist = bgrLeastSquare + expLeastSquare;
     }
 
@@ -208,6 +193,7 @@ public class Replicate
         this.significantWindows = significantWindows;
     }
 
+    @Override
     public double getWeight() {
         return weight;
     }
@@ -216,6 +202,7 @@ public class Replicate
         this.weight = weight;
     }
 
+    @Override
     public boolean isActive() {
         return active;
     }

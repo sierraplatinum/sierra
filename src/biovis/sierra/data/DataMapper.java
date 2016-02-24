@@ -17,16 +17,14 @@
  */
 package biovis.sierra.data;
 
-import biovis.sierra.data.peakcaller.INMReplicate;
 import biovis.sierra.data.peakcaller.PeakQuality;
-import biovis.sierra.data.peakcaller.SignificantWindowHistogram;
+import biovislib.parallel4.Tuple;
+import biovislib.statistics.INMReplicate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import parallel4.Tuple;
 
 /**
  *
@@ -34,12 +32,11 @@ import parallel4.Tuple;
  */
 public class DataMapper {
 
+    // Input data
     private List<Replicate> replicates;
-    private Map<Integer, ReplicateDataSet> replicateDataSetByTag;
+    private transient Map<Integer, ReplicateDataSet> replicateDataSetByTag;
 
-    private SignificantWindowHistogram swh;
-    private Map<String, Integer> signifcantWindowMedianChrWise;
-
+    //Parameters
     private int windowsize = 200;
     private int offset = 50;
     private double pvaluecutoff = 1E-5;
@@ -53,6 +50,9 @@ public class DataMapper {
     private int numCores = 4;
     private int numCoresWindowFactory = 6;
     private int numCoresPeakQuality = 6;
+
+    // Results
+    private Map<String, Integer> significantWindowMedianChrWise;
 
     private double[][] replicatePearsonCorrelation;
 
@@ -72,6 +72,7 @@ public class DataMapper {
     private String qValueMethod = "Holm Bonferroni";
     //private String qValueMethod = "Storey Simple";
     //private String qValueMethod = "Storey Bootstrap";
+
     /**
      * Constructor.
      */
@@ -82,14 +83,6 @@ public class DataMapper {
         setWeighted(true);
         setCorrectCorrelation(true);
         setQualityCounting(true);
-    }
-
-    public void setScalingFactor(int tag, double sf) {
-        replicates.get(tag).setScalingFactor(sf);
-    }
-
-    public double getScalingFactor(int tag) {
-        return replicates.get(tag).getScalingFactor();
     }
 
     public int getNumberOfDataSets() {
@@ -104,17 +97,6 @@ public class DataMapper {
             finalizeReplicateList();
         }
         return replicateDataSetByTag.get(dataSetIndex);
-    }
-
-    public double getLambda(int replicateIndex, boolean experiment) {
-        if (replicateDataSetByTag.isEmpty()) {
-            finalizeReplicateList();
-        }
-        if (experiment) {
-            return replicates.get(replicateIndex).getExperiment().getLambda();
-        } else {
-            return replicates.get(replicateIndex).getBackground().getLambda();
-        }
     }
 
     public void addReplicate(Replicate rep) {
@@ -166,14 +148,6 @@ public class DataMapper {
 
     public void setPvaluecutoff(double pvaluecutoff) {
         this.pvaluecutoff = pvaluecutoff;
-    }
-
-    public SignificantWindowHistogram getSignificantWindowHistogram() {
-        return swh;
-    }
-
-    public void setSignificantWindowHistogram(SignificantWindowHistogram swh) {
-        this.swh = swh;
     }
 
     public double[][] getReplicatePearsonCorrelation() {
@@ -300,20 +274,24 @@ public class DataMapper {
     }
 
     public Map<String, Integer> getSignifcantWindowMedianChrWise() {
-        return signifcantWindowMedianChrWise;
+        return significantWindowMedianChrWise;
     }
 
     public void setSignifcantWindowMedianChrWise(
             Map<String, Integer> signifcantWindowMedianChrWise) {
-        this.signifcantWindowMedianChrWise = signifcantWindowMedianChrWise;
+        this.significantWindowMedianChrWise = signifcantWindowMedianChrWise;
     }
 
     public int getCurrentStep() {
         return currentStep;
     }
 
-    public void setCurrentStep(int currentStep) {
-        this.currentStep = currentStep;
+    public void resetCurrentStep() {
+        currentStep = 1;
+    }
+    
+    public void incrementCurrentStep() {
+        ++currentStep;
     }
 
     public int getMaxPValueExp() {
@@ -324,10 +302,6 @@ public class DataMapper {
         if (maxPValueExp > this.maxPValueExp) {
             this.maxPValueExp = maxPValueExp;
         }
-    }
-
-    public void clearDuplicates() {
-        replicateDataSetByTag.clear();
     }
 
     public boolean hasResults() {

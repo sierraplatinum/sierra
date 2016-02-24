@@ -23,6 +23,10 @@ import biovis.sierra.data.Read;
 import biovis.sierra.data.windows.Window;
 import biovis.sierra.data.windows.WindowList;
 import biovis.sierra.server.Commander.PeakCommander;
+import biovislib.parallel4.IterationInt;
+import biovislib.parallel4.Parallel2;
+import biovislib.parallel4.ParallelForInt2;
+import biovislib.parallel4.ParallelizationFactory;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
@@ -40,11 +44,6 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import parallel4.IterationInt;
-import parallel4.Parallel2;
-import parallel4.ParallelForInt2;
-import parallel4.ParallelizationFactory;
-
 /**
  *
  * @author Lydia Mueller, Dirk Zeckzer
@@ -52,7 +51,6 @@ import parallel4.ParallelizationFactory;
 public class WindowFactoryReaderSerial1ChunkParallelCoherent2
         extends WindowFactory {
 
-    private static int CHUNK_SIZE = 10000;
     private static int QUEUE_END = 10000;
 
     private static SamRecordIntervalIteratorFactory samRecordIntervalIteratorFactory = new SamRecordIntervalIteratorFactory();
@@ -77,6 +75,7 @@ public class WindowFactoryReaderSerial1ChunkParallelCoherent2
      * @param windowSize length of windows
      * @param windowOffset offset by which window start is moved to the next window
      * @param pc peak commander
+     * @param chunkSize chunk size
      * @return WindowList with list of windows ready for calculations
      * @throws IOException Throws IOException if SamReader cannot close the file
      */
@@ -96,13 +95,11 @@ public class WindowFactoryReaderSerial1ChunkParallelCoherent2
 
         //extract chromosomes and length from sam file
         //chunk size for parallelization
-        
-//        final int chunkSize = CHUNK_SIZE;
         log.log(Level.INFO, "Chunk size: {0}", chunkSize);
 
         // construct TreeMap to find corresponding chromosome
         Map<String, Integer> genome = WindowFactory.generateGenome(mapper);
-        final WindowFactoryChunkMap chrtree = new WindowFactoryChunkMap(genome, windowSize, windowOffset);
+        final WindowFactoryChunkMap chrtree = new WindowFactoryChunkMap(genome, windowSize, windowOffset, chunkSize);
         final int chunks = chrtree.getChunks();
         log.info("genome chunks prepared for calculation");
 
