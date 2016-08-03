@@ -79,6 +79,8 @@ public class PeakMeSpaceParallel {
                 double lambda;
                 double count;
                 double pval;
+                double countBack;
+                double pvalBack;
                 for (Window w : windows) {
                     // Neighborhood lambda values
                     lambda1k = neighbors1kFactory.computeLambda(w, index);
@@ -92,6 +94,12 @@ public class PeakMeSpaceParallel {
 
                         lambda = Math.max(Math.max(replicate.getBackground().getLambdaFromPoisson(), lambda1k[controlTag]),
                                           Math.max(lambda5k[controlTag], lambda10k[controlTag]));
+                        countBack = w.getTagCount(controlTag);
+                        pvalBack = replicate.getBackground().getPValue(lambda, countBack);
+
+                        if (pvalBack < mapper.getPvaluecutoff()) {
+                        	lambda = countBack;
+                        }
                         count = w.getTagCount(expTag);
                         pval = replicate.getBackground().getPValue(lambda, count);
                         w.setRawPValue(replicate.getIndex(), pval);
